@@ -1,0 +1,29 @@
+<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gagan Hotel & Restaurant</title><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#8b0000"><style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;background:#f5f5f5;color:#222}.app{max-width:600px;margin:auto;background:#fff;min-height:100vh}
+header{background:#8b0000;color:#fff;padding:20px;position:sticky;top:0;z-index:3}.brand{font-size:25px;font-weight:800}.sub{font-size:13px;opacity:.9;margin-top:4px}
+.info{padding:12px 18px;background:#fff4f4;font-size:13px;line-height:1.6}.search{margin:14px 18px;width:calc(100% - 36px);padding:12px;border:1px solid #ddd;border-radius:12px;font-size:16px}.cats{display:flex;gap:8px;overflow:auto;padding:0 18px 8px}.cats button{border:0;border-radius:20px;padding:9px 14px;white-space:nowrap}.cats button.active{background:#8b0000;color:#fff}
+.item{margin:10px 18px;padding:14px;border-radius:15px;box-shadow:0 2px 10px #00000012;display:flex;justify-content:space-between;align-items:center}.item small{color:#666}.price{font-weight:800;margin-top:4px}.add,.primary{border:0;background:#8b0000;color:#fff;border-radius:10px;padding:10px 14px;font-weight:700}.cart{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);width:min(570px,calc(100% - 28px));border:0;background:#8b0000;color:#fff;border-radius:14px;padding:15px;font-size:16px;font-weight:800}.modal{display:none;position:fixed;inset:0;background:#0008;z-index:10;padding:20px}.box{background:#fff;max-width:520px;margin:5vh auto;padding:20px;border-radius:18px;max-height:90vh;overflow:auto}.box input,.box textarea,.box select{width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:10px}.close{float:right;border:0;border-radius:50%;width:32px;height:32px}.note{font-size:12px;color:#666}
+</style></head><body><div class="app"><header><div class="brand">Gagan Hotel & Restaurant</div><div class="sub">Online Food Delivery</div></header>
+<div class="info">📍 Pahladpur Kidoli, Kharkhoda — Near Maruti & Suzuki<br>📞 9812078543 • 9817325696<br>🛵 Delivery: All IMT Kharkhoda Area</div>
+<input id="search" class="search" placeholder="खाना खोजें..." oninput="render()"><div id="cats" class="cats"></div><main id="menu"></main>
+<button class="cart" onclick="openCart()">🛒 <span id="cc">0</span> items • ₹<span id="ct">0</span> — Order Now</button></div>
+<div id="modal" class="modal"><div class="box"><button class="close" onclick="closeCart()">×</button><h2>आपका ऑर्डर</h2><div id="cartLines"></div><hr><b>Total: ₹<span id="grand">0</span></b>
+<input id="name" placeholder="Customer Name"><input id="phone" placeholder="Mobile Number"><textarea id="address" rows="3" placeholder="Delivery Address"></textarea>
+<select id="pay"><option value="online">Online Payment</option><option value="cod">Cash on Delivery</option></select>
+<button class="primary" style="width:100%;margin-top:8px" onclick="placeOrder()">Order Place करें</button><p class="note">Online payment का वास्तविक gateway production backend से सुरक्षित तरीके से जोड़ना होगा.</p></div></div>
+<script>
+const foods=[
+{id:1,n:"Paneer Butter Masala",c:"North Indian",p:220},{id:2,n:"Dal Makhani",c:"North Indian",p:160},
+{id:3,n:"Shahi Paneer",c:"North Indian",p:210},{id:4,n:"Chole Bhature",c:"North Indian",p:140},
+{id:5,n:"Veg Fried Rice",c:"Chinese",p:150},{id:6,n:"Hakka Noodles",c:"Chinese",p:150},
+{id:7,n:"Cold Drink",c:"Drinks",p:50}];
+let cart=[],cat="All"; const cats=[...new Set(foods.map(x=>x.c))];
+function drawCats(){document.querySelector("#cats").innerHTML=["All",...cats].map(x=>`<button class="${cat==x?'active':''}" onclick="cat='${x}';drawCats();render()">${x}</button>`).join("")}
+function render(){let q=search.value.toLowerCase();let list=foods.filter(x=>(cat=="All"||x.c==cat)&&(x.n.toLowerCase().includes(q)||x.c.toLowerCase().includes(q)));menu.innerHTML=list.map(x=>`<div class="item"><div><b>${x.n}</b><br><small>${x.c}</small><div class="price">₹${x.p}</div></div><button class="add" onclick="add(${x.id})">ADD</button></div>`).join("")}
+function add(id){cart.push(foods.find(x=>x.id==id));update();alert("Cart में जोड़ दिया गया")}
+function update(){cc.textContent=cart.length;ct.textContent=cart.reduce((s,x)=>s+x.p,0)}
+function openCart(){if(!cart.length)return alert("पहले खाना चुनें");cartLines.innerHTML=cart.map((x,i)=>`${i+1}. ${x.n} — ₹${x.p}`).join("<br>");grand.textContent=cart.reduce((s,x)=>s+x.p,0);modal.style.display="block"}
+function closeCart(){modal.style.display="none"}
+function placeOrder(){if(!name.value||!phone.value||!address.value)return alert("Name, mobile और address भरें");let total=cart.reduce((s,x)=>s+x.p,0);let order={id:"GH"+Date.now().toString().slice(-6),name:name.value,phone:phone.value,address:address.value,payment:pay.value,total,items:cart.map(x=>x.n),status:"New",time:new Date().toLocaleString("en-IN")};localStorage.setItem("lastOrder",JSON.stringify(order));alert("Order "+order.id+" receive हो गया!");cart=[];update();closeCart()}
+drawCats();render();update();
+</script></body></html>
